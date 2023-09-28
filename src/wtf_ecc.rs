@@ -9,7 +9,7 @@ pub struct WtfECC {
 pub type BytesChain = Chain<Chain<Bytes, Bytes>, Bytes>;
 
 impl WtfECC {
-	pub const EXPANSTION_RATIO: usize = 3;
+	pub const EXPANSION_RATIO: usize = 3;
 
 	pub fn new() -> Self {
 		Self::default()
@@ -44,7 +44,7 @@ impl WtfECC {
 	}
 
 	pub fn decode_into(&mut self, src: &mut Bytes, dst: &mut BytesMut) {
-		let chunk_len = src.len() / Self::EXPANSTION_RATIO;
+		let chunk_len = src.len() / Self::EXPANSION_RATIO;
 		let a = src.split_to(chunk_len);
 		let b = src.split_to(chunk_len);
 		let c = src;
