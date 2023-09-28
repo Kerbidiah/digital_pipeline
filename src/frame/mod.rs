@@ -1,9 +1,9 @@
-#![allow(dead_code)]
-
 use bytes::{Bytes, Buf};
 
 use crate::wtf_ecc;
 use wtf_ecc::WtfECC;
+
+pub mod encode_task;
 
 #[derive(Debug)]
 pub struct Frame {
