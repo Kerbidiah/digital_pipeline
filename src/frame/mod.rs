@@ -7,7 +7,6 @@ use wtf_ecc::WtfECC;
 
 #[derive(Debug)]
 pub struct Frame {
-	pub ident: &'static [u8], // reference to a static or const slice of bytes that is the ident
 	len: u16,
 	bin: Bytes,
 }
@@ -17,15 +16,14 @@ impl Frame {
 
 	/// creates a new `Frame`, returning `Err(bin.copy_to_bytes())` if `bin` is too big.
 	pub fn new_from_bin(bin: impl Buf) -> Result<Self, Bytes> {
-		let mut ans = Self::new_empty_with_ident(&Self::IDENT);
+		let mut ans = Self::empty();
 		ans.change_bin(bin)?;
 
 		Ok(ans)
 	}
 
-	pub fn new_empty_with_ident(ident: &'static [u8]) -> Self {
+	pub fn empty() -> Self {
 		Self {
-			ident,
 			len: 0,
 			bin: Bytes::new()
 		}
@@ -54,9 +52,9 @@ impl Frame {
 		self.len as usize
 	}
 
-	pub fn encode(mut self) -> Bytes { // figure out how to return a `Buf`
+	pub fn encode(self) -> Bytes { // figure out how to return a `Buf`
 		let mut encoder = WtfECC::new();
-		let encoded_ident = encoder.encode_to_bytes(self.ident.copy_to_bytes(self.ident.len()));
+		let encoded_ident = encoder.encode_to_bytes(Bytes::from_static(&Self::IDENT));
 		
 		encoder.reset();
 		let encoded_len = encoder.encode_to_bytes(Bytes::from(self.len.to_le_bytes().to_vec()));
@@ -68,6 +66,4 @@ impl Frame {
 
 		data.copy_to_bytes(data.remaining())
 	}
-
-	
 }
