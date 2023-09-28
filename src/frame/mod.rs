@@ -1,0 +1,73 @@
+#![allow(dead_code)]
+
+use bytes::{Bytes, Buf};
+
+use crate::wtf_ecc;
+use wtf_ecc::WtfECC;
+
+#[derive(Debug)]
+pub struct Frame {
+	pub ident: &'static [u8], // reference to a static or const slice of bytes that is the ident
+	len: u16,
+	bin: Bytes,
+}
+
+impl Frame {
+	pub const IDENT: [u8; 4] = 0b11110000111100001111000011110000_u32.to_le_bytes();
+
+	/// creates a new `Frame`, returning `Err(bin.copy_to_bytes())` if `bin` is too big.
+	pub fn new_from_bin(bin: impl Buf) -> Result<Self, Bytes> {
+		let mut ans = Self::new_empty_with_ident(&Self::IDENT);
+		ans.change_bin(bin)?;
+
+		Ok(ans)
+	}
+
+	pub fn new_empty_with_ident(ident: &'static [u8]) -> Self {
+		Self {
+			ident,
+			len: 0,
+			bin: Bytes::new()
+		}
+	}
+
+	/// changes bin, returning `Err(new_bin.copy_to_bytes())` if `new_bin` is too big.
+	pub fn change_bin(&mut self, mut new_bin: impl Buf) -> Result<(), Bytes> {
+		let len = new_bin.remaining();
+
+		// make sure that we don't try to transmit a message longer than the max that len allows for
+		if len > (u16::MAX as usize) {
+			Err(new_bin.copy_to_bytes(len)) // TODO: figure out how to return the buffer w/o converting to Bytes
+		} else {
+			self.len = len as u16;
+			self.bin = new_bin.copy_to_bytes(len);
+
+			Ok(())
+		}
+	}
+
+	pub fn len(&self) -> u16 {
+		self.len
+	}
+
+	pub fn len_usize(&self) -> usize {
+		self.len as usize
+	}
+
+	pub fn encode(mut self) -> Bytes { // figure out how to return a `Buf`
+		let mut encoder = WtfECC::new();
+		let encoded_ident = encoder.encode_to_bytes(self.ident.copy_to_bytes(self.ident.len()));
+		
+		encoder.reset();
+		let encoded_len = encoder.encode_to_bytes(Bytes::from(self.len.to_le_bytes().to_vec()));
+		
+		encoder.reset();
+		let encoded_bin = encoder.encode(self.bin);
+
+		let mut data = encoded_ident.chain(encoded_len).chain(encoded_bin);
+
+		data.copy_to_bytes(data.remaining())
+	}
+
+	
+}
