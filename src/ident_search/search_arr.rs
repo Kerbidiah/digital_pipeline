@@ -1,5 +1,6 @@
 use bitvec::prelude::*;
 use bytes::{Buf, Bytes};
+
 use super::super::frame::Frame;
 use super::super::wtf_ecc::WtfECC;
 
@@ -66,8 +67,9 @@ impl SearchArr {
 	}
 }
 
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct ShiftInfo {
+pub struct ShiftInfo { // TODO: replace with Shifter (would mean adjusting the tests)
 	/// number of bits leftover
 	pub offset: u8,
 	/// the leftmost `self.offset` bits are what is leftover

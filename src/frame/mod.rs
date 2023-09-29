@@ -4,6 +4,7 @@ use super::wtf_ecc;
 use wtf_ecc::WtfECC;
 
 pub mod encode_task;
+pub mod decode_task;
 
 #[derive(Debug)]
 pub struct Frame {
