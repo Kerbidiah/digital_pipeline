@@ -1,6 +1,6 @@
 use bytes::{Bytes, Buf};
 
-use crate::wtf_ecc;
+use super::wtf_ecc;
 use wtf_ecc::WtfECC;
 
 pub mod encode_task;
@@ -12,7 +12,9 @@ pub struct Frame {
 }
 
 impl Frame {
-	pub const IDENT: [u8; 4] = 0b11110000111100001111000011110000_u32.to_le_bytes();
+	// NOTE: using big endian because it matches how its written
+	pub const IDENT: [u8; 4] = 0b11110000111100001111000011110000_u32.to_be_bytes();
+	pub const ENCODED_IDENT_LENGTH: usize = Self::IDENT.len() * WtfECC::EXPANSION_RATIO;
 
 	/// creates a new `Frame`, returning `Err(bin.copy_to_bytes())` if `bin` is too big.
 	pub fn new_from_bin(bin: impl Buf) -> Result<Self, Bytes> {
