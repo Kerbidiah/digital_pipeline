@@ -1,7 +1,11 @@
-CHANGES MADE IN -------------------------
-wtf_ecc.rs
-cargo.toml
+SEE CHANGES SINCE `COPIED TO REPO` commit
 
-NEW STUFF -------------------------------
-frame/
-ident_search/
+KNOWN GOOD:
+encode
+middle_man
+
+SUS:
+ident_search:
+GOOD: len
+GOOD: ident
+problem: droping first byte

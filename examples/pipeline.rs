@@ -1,15 +1,14 @@
-const NUM_BYTES: usize = 1_000;
-const SIZE_FRAME: usize = 100;
+const NUM_BYTES: usize = 100_000_000;
+const SIZE_FRAME: usize = 64_000;
 const NUM_FRAMES: usize = NUM_BYTES / SIZE_FRAME;
 
-use bytes::Buf;
 use digital_pipeline::prelude::*;
 use digital_pipeline::middle_man;
 use rand::prelude::*;
 use bytes::Bytes;
 
 use std::thread;
-use std::time::Duration;
+use std::time;
 
 fn main() {
 	// setup the tasks of the pipeline
@@ -25,7 +24,7 @@ fn main() {
 	}
 
 	// start the tasks (any order works, but doing it in reverse is probably best)
-	decoder.start();
+	// decoder.start();
 	searcher.start();
 	middle.start();
 	encoder.start();
@@ -39,7 +38,7 @@ fn main() {
 	// progress monitoring thread
 	let rx_decode_clone = rx_decode.clone();
 	let info_thread = thread::spawn(move || {
-		loop {
+		while !rx_start.is_empty() || !rx_encoder.is_empty() || !rx_middle_man.is_empty() || !rx_search.is_empty() || !rx_decode_clone.is_empty() {
 			dbg!(rx_start.len());
 			dbg!(rx_encoder.len());
 			dbg!(rx_middle_man.len());
@@ -47,25 +46,32 @@ fn main() {
 			dbg!(rx_decode_clone.len());
 			dbg!("---------");
 
-			thread::sleep(Duration::from_millis(500));
+			thread::sleep(time::Duration::from_millis(250));
 		}
 	});
 
+	let timer = time::Instant::now();
+	decoder.start();
+
 	// receive the data from the pipeline
 	let mut output_data: Vec<Bytes> = Vec::new();
-	for i in 0..NUM_FRAMES {
-		dbg!(i);
+	for _ in 0..NUM_FRAMES {
 		output_data.push(rx_decode.recv().unwrap());
 	}
-	dbg!("DONE");
+
+	let dur = timer.elapsed();
 
 	for (i, (og, out)) in original_data.iter().zip(output_data).enumerate() {
 		dbg!(i);
 
-		assert_eq!(og.to_vec(), out.to_vec());
+		if og.to_vec() != out.to_vec() {
+			assert_eq!(og.to_vec(), out.to_vec())
+		}
 	}
+	
+	dbg!(dur);
 
-	info_thread.join().unwrap();
+	// info_thread.join().unwrap();
 }
 
 fn random_bytes(len: usize) -> Bytes {
