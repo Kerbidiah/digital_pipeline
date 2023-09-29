@@ -14,10 +14,10 @@ use std::time;
 fn main() {
 	// setup the tasks of the pipeline
 	let (tx_start, rx_start) = create_bytes_channel();
-	let (encoder, rx_encoder) = encode_task::Task::new(rx_start.clone());
-	let (middle, rx_middle_man) = middle_man::Task::new(rx_encoder.clone()); // this is for testing purposes
-	let (searcher, rx_search) = search_task::Task::new(rx_middle_man.clone());
-	let (decoder, rx_decode) = decode_task::Task::new(rx_search.clone());
+	let (encoder, rx_encoder) = encode_task::Task::new(rx_start);
+	let (middle, rx_middle_man) = middle_man::Task::new(rx_encoder); // this is for testing purposes
+	let (searcher, rx_search) = search_task::Task::new(rx_middle_man);
+	let (decoder, rx_decode) = decode_task::Task::new(rx_search);
 
 	let mut original_data = Vec::with_capacity(NUM_FRAMES);
 	for _ in 0..NUM_FRAMES {
@@ -37,19 +37,19 @@ fn main() {
 	drop(tx_start);
 
 	// progress monitoring thread
-	let rx_decode_clone = rx_decode.clone();
-	let info_thread = thread::spawn(move || {
-		while !rx_start.is_empty() || !rx_encoder.is_empty() || !rx_middle_man.is_empty() || !rx_search.is_empty() || !rx_decode_clone.is_empty() {
-			dbg!(rx_start.len());
-			dbg!(rx_encoder.len());
-			dbg!(rx_middle_man.len());
-			dbg!(rx_search.len());
-			dbg!(rx_decode_clone.len());
-			dbg!("---------");
+	// let rx_decode_clone = rx_decode.clone();
+	// let info_thread = thread::spawn(move || {
+	// 	while !rx_start.is_empty() || !rx_encoder.is_empty() || !rx_middle_man.is_empty() || !rx_search.is_empty() || !rx_decode_clone.is_empty() {
+	// 		dbg!(rx_start.len());
+	// 		dbg!(rx_encoder.len());
+	// 		dbg!(rx_middle_man.len());
+	// 		dbg!(rx_search.len());
+	// 		dbg!(rx_decode_clone.len());
+	// 		dbg!("---------");
 
-			thread::sleep(time::Duration::from_millis(250));
-		}
-	});
+	// 		thread::sleep(time::Duration::from_millis(250));
+	// 	}
+	// });
 
 	let timer = time::Instant::now();
 	decoder.start();
@@ -71,8 +71,6 @@ fn main() {
 	
 	dbg!(ACTUAL_BYTES);
 	dbg!(dur);
-
-	// info_thread.join().unwrap();
 }
 
 fn random_bytes(len: usize) -> Bytes {
