@@ -1,6 +1,7 @@
 const NUM_BYTES: usize = 100_000_000;
-const SIZE_FRAME: usize = 64_000;
+const SIZE_FRAME: usize = 50_000;
 const NUM_FRAMES: usize = NUM_BYTES / SIZE_FRAME;
+const ACTUAL_BYTES: usize = NUM_FRAMES * SIZE_FRAME;
 
 use digital_pipeline::prelude::*;
 use digital_pipeline::middle_man;
@@ -68,6 +69,7 @@ fn main() {
 		}
 	}
 	
+	dbg!(ACTUAL_BYTES);
 	dbg!(dur);
 
 	// info_thread.join().unwrap();
@@ -82,26 +84,26 @@ fn random_bytes(len: usize) -> Bytes {
 }
 
 pub fn eprint_bin(arr: &[u8], tag: Option<&str>) {
-    if let Some(s) = tag {
-        eprintln!("{}:", s);
-    }
-    for b in arr {
-        eprintln!("{:#010b}, {b:#3}", b);
-    }
-    eprintln!();
+	if let Some(s) = tag {
+		eprintln!("{}:", s);
+	}
+	for b in arr {
+		eprintln!("{:#010b}, {b:#3}", b);
+	}
+	eprintln!();
 }
 
 pub fn eprint_diff(arr1: &[u8], arr2: &[u8]) {
-    let diff: Vec<u8> = arr1.iter().zip(arr2)
-        .map(|x| {
-            x.0 ^ x.1
-        }).collect();
+	let diff: Vec<u8> = arr1.iter().zip(arr2)
+		.map(|x| {
+			x.0 ^ x.1
+		}).collect();
 
-    eprint_bin(&diff, Some("diff"));
+	eprint_bin(&diff, Some("diff"));
 }
 
 pub fn eprint_bytes_masked(arr: &[u8], mask: u8) {
-    for b in arr {
-        eprintln!("{}", b & mask);
-    }
+	for b in arr {
+		eprintln!("{}", b & mask);
+	}
 }
