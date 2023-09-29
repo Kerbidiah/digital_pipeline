@@ -208,7 +208,6 @@ mod tests {
 
 		// just to be extra sure that we don't accidentally peek at them
 		drop(byte_stream);
-		drop(shift_left_by);
 
 		let mut space: u16 = (ans.unwrap().head as u16) << offset;
 

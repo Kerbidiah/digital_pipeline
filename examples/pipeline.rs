@@ -2,6 +2,7 @@ const NUM_BYTES: usize = 1_000;
 const SIZE_FRAME: usize = 100;
 const NUM_FRAMES: usize = NUM_BYTES / SIZE_FRAME;
 
+use bytes::Buf;
 use digital_pipeline::prelude::*;
 use digital_pipeline::middle_man;
 use rand::prelude::*;
@@ -60,7 +61,8 @@ fn main() {
 
 	for (i, (og, out)) in original_data.iter().zip(output_data).enumerate() {
 		dbg!(i);
-		assert_eq!(og.to_vec(), out.to_vec())
+
+		assert_eq!(og.to_vec(), out.to_vec());
 	}
 
 	info_thread.join().unwrap();
@@ -72,4 +74,29 @@ fn random_bytes(len: usize) -> Bytes {
 	rng.fill_bytes(&mut data);
 
 	data.into()
+}
+
+pub fn eprint_bin(arr: &[u8], tag: Option<&str>) {
+    if let Some(s) = tag {
+        eprintln!("{}:", s);
+    }
+    for b in arr {
+        eprintln!("{:#010b}, {b:#3}", b);
+    }
+    eprintln!();
+}
+
+pub fn eprint_diff(arr1: &[u8], arr2: &[u8]) {
+    let diff: Vec<u8> = arr1.iter().zip(arr2)
+        .map(|x| {
+            x.0 ^ x.1
+        }).collect();
+
+    eprint_bin(&diff, Some("diff"));
+}
+
+pub fn eprint_bytes_masked(arr: &[u8], mask: u8) {
+    for b in arr {
+        eprintln!("{}", b & mask);
+    }
 }
