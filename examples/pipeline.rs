@@ -62,9 +62,8 @@ fn main() {
 	let dur = timer.elapsed();
 
 	for (i, (og, out)) in original_data.iter().zip(output_data).enumerate() {
-		dbg!(i);
-
 		if og.to_vec() != out.to_vec() {
+			dbg!(i);
 			assert_eq!(og.to_vec(), out.to_vec())
 		}
 	}
