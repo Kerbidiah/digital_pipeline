@@ -1,10 +1,11 @@
-const NUM_BYTES: usize = 100_000_000;
-const SIZE_FRAME: usize = 50_000;
+const NUM_BYTES: usize = 50_000_000;
+const SIZE_FRAME: usize = 60_000;
 const NUM_FRAMES: usize = NUM_BYTES / SIZE_FRAME;
 const ACTUAL_BYTES: usize = NUM_FRAMES * SIZE_FRAME;
 
 use digital_pipeline::prelude::*;
 use digital_pipeline::middle_man;
+use digital_pipeline::middle_man::stream_shift;
 use rand::prelude::*;
 use bytes::Bytes;
 
@@ -15,7 +16,7 @@ fn main() {
 	// setup the tasks of the pipeline
 	let (tx_start, rx_start) = create_bytes_channel();
 	let (encoder, rx_encoder) = encode_task::Task::new(rx_start);
-	let (middle, rx_middle_man) = middle_man::Task::new(rx_encoder); // this is for testing purposes
+	let (middle, rx_middle_man) = stream_shift::Task::new(rx_encoder, 3); // this is for testing purposes
 	let (searcher, rx_search) = search_task::Task::new(rx_middle_man);
 	let (decoder, rx_decode) = decode_task::Task::new(rx_search);
 
@@ -57,7 +58,7 @@ fn main() {
 	// receive the data from the pipeline
 	let mut output_data: Vec<Bytes> = Vec::new();
 	for _ in 0..NUM_FRAMES {
-		output_data.push(rx_decode.recv().unwrap());
+		output_data.push(rx_decode.recv().unwrap_or_default());
 	}
 
 	let dur = timer.elapsed();

@@ -61,6 +61,7 @@ impl Task {
 			match self.state {
 				State::Ident => {
 					if let Some(shift_info) = self.searcher.push(input) {
+						dbg!(&self.searcher);
 						self.shifter = shift_info.into();
 						self.state = State::Len;
 					} // else, just continue on

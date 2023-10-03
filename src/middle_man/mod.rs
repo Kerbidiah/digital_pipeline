@@ -4,6 +4,7 @@ use bytes::Bytes;
 use flume::{Receiver, Sender};
 
 use crate::SEND_EXPECT_MSG;
+pub mod stream_shift;
 
 /// acts as a middle man for testing purposes
 #[derive(Debug)]

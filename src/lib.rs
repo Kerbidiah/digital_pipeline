@@ -2,6 +2,7 @@ mod wtf_ecc;
 pub mod middle_man;
 pub mod frame;
 pub mod ident_search;
+mod chain;
 
 pub mod prelude {
 	pub use super::frame::{encode_task, decode_task};
